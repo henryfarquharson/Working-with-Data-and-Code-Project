@@ -1,16 +1,19 @@
+# Here I am importing the essential libaries including pathlib to manage file paths and requests to manage the http requests made to the backend
+
 import os, time, signal, shutil, requests
 from pathlib import Path
 
-# Settings from environment
+# These are the settings from environment so if the API or display ID changes I won't need to change them here in the player.py file
 API_BASE   = os.getenv("API_BASE", "https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1")
 DISPLAY_ID = os.getenv("DISPLAY_ID", "")
 ASSETS     = Path(os.getenv("ASSET_DIR", "/home/henry/player/assets"))
 CURRENT    = ASSETS / "current.jpg"
 FALLBACK   = ASSETS / "fallback.jpg"
 
+# this checks if there is a directory to save assets and if that is false then a directory will be made
 ASSETS.mkdir(parents=True, exist_ok=True)
 
-# The Graceful stop 
+# The Graceful stop: Helping the script to shut down if instructed by the operating system or the user. 
 _running = True
 def _stop(*_):
     global _running
@@ -18,13 +21,14 @@ def _stop(*_):
 signal.signal(signal.SIGTERM, _stop)
 signal.signal(signal.SIGINT, _stop)
 
-# Helpers
+# This prevents the display from showing a partially downloaded image
 def atomic_write_bytes(dest: Path, content: bytes):
     tmp = dest.with_suffix(dest.suffix + ".tmp")
     with open(tmp, "wb") as f:
         f.write(content)
     tmp.replace(dest)  # atomic swap -> viewer never sees a half file
 
+#fetches and shows the fallback image. If there is an issue e.g. loss of connection to the backend, the system will show the default image to ensure a display to shown on the screen always.
 def show_fallback():
     if FALLBACK.exists():
         shutil.copyfile(FALLBACK, CURRENT)
@@ -85,6 +89,7 @@ def run_once():
 
     time.sleep(5)
 
+# when the program shuts down it prints clean exit to ensure an intentional shutdown
 def main():
     backoff = 2
     while _running:
