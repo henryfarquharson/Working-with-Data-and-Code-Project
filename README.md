@@ -1,4 +1,4 @@
-# Itroduction: Graffiti Wall 
+# Introduction: Graffiti Wall 
 Graffiti Wall is my project prototype and uses a Raspberry Pi to communicate with the Graffiti Wall website to display advertisments and content on large digital screens. You can watch the demo video here https://youtu.be/mtNwoBIObh8
 # Table of contents
 - Overview
