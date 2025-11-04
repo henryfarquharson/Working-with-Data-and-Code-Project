@@ -28,7 +28,7 @@ def atomic_write_bytes(dest: Path, content: bytes):
         f.write(content)
     tmp.replace(dest)  # atomic swap -> viewer never sees a half file
 
-#fetches and shows the fallback image. If there is an issue e.g. loss of connection to the backend, the system will show the default image to ensure a display to shown on the screen always.
+#fetches and shows the fallback image. If there is an issue e.g. loss of connection to the backend, the system will show the default image to ensure a display is shown on the screen always.
 def show_fallback():
     if FALLBACK.exists():
         shutil.copyfile(FALLBACK, CURRENT)
