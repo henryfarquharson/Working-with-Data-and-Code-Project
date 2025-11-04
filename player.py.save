@@ -1,7 +1,7 @@
 import os, time, signal, shutil, requests
 from pathlib import Path
 
-# ---- Settings from .env (already created) ----
+# Settings from the environment
 API_BASE   = os.getenv("API_BASE", "https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1")
 DISPLAY_ID = os.getenv("DISPLAY_ID", "")
 ASSETS     = Path(os.getenv("ASSET_DIR", "/home/henry/player/assets"))
@@ -10,7 +10,7 @@ FALLBACK   = ASSETS / "fallback.jpg"
 
 ASSETS.mkdir(parents=True, exist_ok=True)
 
-# ---- Graceful stop (for systemctl stop/restart) ----
+# The Graceful stop
 _running = True
 def _stop(*_):
     global _running
@@ -18,7 +18,7 @@ def _stop(*_):
 signal.signal(signal.SIGTERM, _stop)
 signal.signal(signal.SIGINT, _stop)
 
-# ---- Helpers ----
+# Helpers
 def atomic_write_bytes(dest: Path, content: bytes):
     tmp = dest.with_suffix(dest.suffix + ".tmp")
     with open(tmp, "wb") as f:
@@ -44,7 +44,7 @@ def extract_image_url(data: dict):
     creative = data.get("creative") or data.get("slot", {}).get("creative") or {}
     return creative.get("url") or creative.get("imageUrl")
 
-# ---- One cycle ----
+# First Cycle
 def run_once():
     try:
         r = requests.get(f"{API_BASE}/playlist", params={"displayId": DISPLAY_ID}, timeout=15)
