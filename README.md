@@ -1,10 +1,11 @@
 # Itroduction: Graffiti Wall 
-Graffiti Wall is my project prototype and uses a Raspberry Pi to communicate with the Graffiti Wall website to display advertisments and content on large digital screens. You can watch the demo video here
+Graffiti Wall is my project prototype and uses a Raspberry Pi to communicate with the Graffiti Wall website to display advertisments and content on large digital screens. You can watch the demo video here https://youtu.be/mtNwoBIObh8
 # Table of contents
 - Overview
 - The Miro Project Journal Link
 - The Goal
 - How it works
+- Explainer Video
 - The Tech Stack
 - The Main Features
 - How to use the prototype
@@ -21,6 +22,8 @@ To reduce the barrier to outdoor advertising allowing companies and people to ex
 Users upload media through the Graffiti Wall website which is connected to the supabase backend. 
 Then the Raspberry Pi polls the Supabase API, retrieves the display content in a JSON format, and shows it in fullscreen kiosk mode via Chromium.
 A fallback image is displayed when no content is available.
+## Explainer Video
+In case there is any issues here is my explainer video https://youtu.be/-2OsFr4EoSs
 ## The Tech Stack
 Raspberry Pi 4B: The core of the prototype communicating with the backend and displaying images
 Supabase: The backend where all the content and ad details are stored
