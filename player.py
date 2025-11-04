@@ -1,0 +1,102 @@
+import os, time, signal, shutil, requests
+from pathlib import Path
+
+# ---- Settings from .env (already created) ----
+API_BASE   = os.getenv("API_BASE", "https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1")
+DISPLAY_ID = os.getenv("DISPLAY_ID", "")
+ASSETS     = Path(os.getenv("ASSET_DIR", "/home/henry/player/assets"))
+CURRENT    = ASSETS / "current.jpg"
+FALLBACK   = ASSETS / "fallback.jpg"
+
+ASSETS.mkdir(parents=True, exist_ok=True)
+
+# ---- Graceful stop (for systemctl stop/restart) ----
+_running = True
+def _stop(*_):
+    global _running
+    _running = False
+signal.signal(signal.SIGTERM, _stop)
+signal.signal(signal.SIGINT, _stop)
+
+# ---- Helpers ----
+def atomic_write_bytes(dest: Path, content: bytes):
+    tmp = dest.with_suffix(dest.suffix + ".tmp")
+    with open(tmp, "wb") as f:
+        f.write(content)
+    tmp.replace(dest)  # atomic swap -> viewer never sees a half file
+
+def show_fallback():
+    if FALLBACK.exists():
+        shutil.copyfile(FALLBACK, CURRENT)
+        print("Showing fallback.")
+    else:
+        print("Fallback not found:", FALLBACK)
+
+def download_to_current(url: str):
+    r = requests.get(url, timeout=20)
+    r.raise_for_status()
+    atomic_write_bytes(CURRENT, r.content)
+    print("Displayed:", url)
+
+def extract_image_url(data: dict):
+    # Try a few likely places based on your API
+    # data.get("creative", {}).get("url") etc.
+    creative = data.get("creative") or data.get("slot", {}).get("creative") or {}
+    return creative.get("url") or creative.get("imageUrl")
+
+# ---- One cycle ----
+def run_once():
+    try:
+        r = requests.get(f"{API_BASE}/playlist", params={"displayId": DISPLAY_ID}, timeout=15)
+    except requests.RequestException as e:
+        print("Network error:", e)
+        show_fallback()
+        time.sleep(5)
+        return
+
+    if r.status_code == 204:
+        # No content scheduled right now -> show fallback
+        show_fallback()
+        time.sleep(25)
+        return
+
+    if r.ok:
+        try:
+            data = r.json()
+        except Exception as e:
+            print("Bad JSON:", e)
+            show_fallback()
+            time.sleep(10)
+            return
+
+        image_url = extract_image_url(data)
+        if image_url:
+            try:
+                download_to_current(image_url)
+            except Exception as e:
+                print("Download error:", e)
+                show_fallback()
+        else:
+            print("No image URL in response.")
+            show_fallback()
+    else:
+        print("API error:", r.status_code, r.text[:200])
+        show_fallback()
+
+    time.sleep(5)
+
+def main():
+    backoff = 2
+    while _running:
+        try:
+            run_once()
+            backoff = 2
+        except Exception as e:
+            print("Loop error:", e)
+            time.sleep(backoff)
+            backoff = min(backoff * 2, 60)
+    print("Clean exit.")
+
+if __name__ == "__main__":
+    main()
+
