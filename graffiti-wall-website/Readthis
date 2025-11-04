@@ -1,5 +1,14 @@
 # The Webiste
 This is my graffiti wall website readme.md file. This website was built with the help of loveable to design the features and help improve the user experience.
 
-#The Backend
+# The Backend
 I have used a supabase backend to store the users content and details
+
+# The home page
+This is where users land and have the option to sign up or log in
+
+# Upload Page
+Users can upload their content and ads
+
+#Dashboard
+Users can see their past and future display times, where the content has been displayed and for how long
