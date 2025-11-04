@@ -37,11 +37,13 @@ def show_fallback():
         print("Fallback not found:", FALLBACK)
 
 def download_to_current(url: str):
+    # it will download the image and cache it
     r = requests.get(url, timeout=20)
     r.raise_for_status()
     atomic_write_bytes(CURRENT, r.content)
     print("Displayed:", url)
 
+# here the script is trying to get the image url 
 def extract_image_url(data: dict):
     # Try a few likely places based on your API
     # data.get("creative", {}).get("url") etc.
@@ -50,11 +52,13 @@ def extract_image_url(data: dict):
 
 # 1st Cycle
 def run_once():
+    # it tries to make a GET request to the playlist API
     try:
         r = requests.get(f"{API_BASE}/playlist", params={"displayId": DISPLAY_ID}, timeout=15)
     except requests.RequestException as e:
         print("Network error:", e)
         show_fallback()
+        # here it waits before polling again
         time.sleep(5)
         return
 
