@@ -6,19 +6,17 @@ This guide explains how to set up your Raspberry Pi to display scheduled media f
 
 - **Media Storage**: Files uploaded to Supabase storage bucket
 - **Bookings Database**: Stores who, what, when for each display
-- **Playlist API**: `/api/playlist` endpoint that returns current/next media with signed URLs
+- **Playlist API**: returns current/next media with signed URLs
 - **Overlap Prevention**: Database constraint ensures no booking conflicts
 
 ## API Endpoint
 
-The playlist API is available at:
-```
-https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1/playlist
-```
+The playlist API is: https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1/playlist
 
-### Request Format
 
-**Method**: GET or POST
+# Request Format
+
+GET or POST
 
 **Parameters**:
 - `displayId` (required): UUID of the display
@@ -27,14 +25,6 @@ https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1/playlist
 ```bash
 curl "https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1/playlist?displayId=YOUR_DISPLAY_ID"
 ```
-
-**Example POST Request**:
-```bash
-curl -X POST "https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1/playlist" \
-  -H "Content-Type: application/json" \
-  -d '{"displayId": "YOUR_DISPLAY_ID"}'
-```
-
 ### Response Format
 
 ```json
@@ -52,13 +42,6 @@ curl -X POST "https://pbaqcwrozmuxgzacajao.supabase.co/functions/v1/playlist" \
   }
 }
 ```
-
-**Notes**:
-- Signed URLs are valid for 60 seconds (optimized for 10-second polling)
-- `current` is `null` if no media is scheduled for this time
-- `next` is `null` if no upcoming bookings exist
-- All times are in UTC
-
 ## Raspberry Pi Setup
 
 ### 1. Install Required Software
@@ -181,32 +164,13 @@ Demo display code: `DEMO2025`
 sudo reboot
 ```
 
-## Troubleshooting
-
-- **Black screen**: Check if there's a current booking scheduled for this time
-- **Media not updating**: Verify the display ID is correct
-- **Network issues**: Ensure Raspberry Pi has internet connection
-- **Permission errors**: Make sure the media bucket is public
-
 ## How It Works
 
-1. Raspberry Pi polls the playlist API every 10 seconds
+1. Raspberry Pi polls the playlist API every 20 seconds
 2. API checks current UTC time against bookings for the display
 3. API generates a signed URL (valid 60 seconds) for the current media
 4. Browser downloads and displays the media fullscreen
-5. When booking ends, the API returns `null` and screen goes black
+5. When booking ends, the API returns 'nothing to display' and screen switches to the default image
 6. Process repeats for next scheduled booking
 
-## Database Constraint
 
-The `bookings` table has an exclusion constraint that prevents overlapping bookings:
-
-```sql
-CONSTRAINT bookings_display_time_excl 
-EXCLUDE USING gist (
-  display_id WITH =,
-  tstzrange(start_time, end_time) WITH &&
-)
-```
-
-This ensures only one piece of content can be scheduled per display at any given time.
