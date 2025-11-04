@@ -43,7 +43,7 @@ VNC Viewer: The application used to view the Raspberry Pi destop
 - Step 2: Create a profile
 - Step 3: Upload your content and choose the time/duration
 - Step 4: Connect to the Raspberry Pi desktop
-- Step 5: See you ad displayed
+- Step 5: See your ad displayed
 ## Room for improvement
 - When the display switches to the next ad a fade transition could be put in placed to make the flow look more smooth and professional
 - The display needs to be able to support video content
